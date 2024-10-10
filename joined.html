@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Joined Tournaments</title>
+    <link rel="stylesheet" href="styles.css">
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
+        import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_AUTH_DOMAIN",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_STORAGE_BUCKET",
+            messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+            appId: "YOUR_APP_ID",
+            measurementId: "YOUR_MEASUREMENT_ID"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // Check if the user is signed in
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                const userDocRef = doc(db, "users", user.uid);
+                const userDoc = await getDoc(userDocRef);
+                const freeFireName = userDoc.data().freeFireName;
+
+                const joinedSection = document.getElementById('joined-tournaments');
+                joinedSection.innerHTML = 'Loading...';
+
+                // Fetch all tournaments to find where the user has joined
+                const tournaments = ['t1', 't2', 't3']; // Example list of tournament IDs
+                let found = false;
+
+                for (const tournamentId of tournaments) {
+                    const tournamentDocRef = doc(db, "tournaments", tournamentId);
+                    const tournamentDoc = await getDoc(tournamentDocRef);
+
+                    if (tournamentDoc.exists()) {
+                        const players = tournamentDoc.data().players || [];
+
+                        // Check all groups in the tournament
+                        players.forEach((group, index) => {
+                            if (group.includes(freeFireName)) {
+                                found = true;
+
+                                const groupDiv = document.createElement('div');
+                                groupDiv.classList.add('group-section');
+                                groupDiv.innerHTML = `
+                                    <h2>${tournamentId} - Group ${index + 1}</h2>
+                                    <ul>${group.map(player => `<li>${player}</li>`).join('')}</ul>
+                                `;
+                                joinedSection.appendChild(groupDiv);
+                            }
+                        });
+                    }
+                }
+
+                if (!found) {
+                    joinedSection.innerHTML = '<p>No tournaments joined yet.</p>';
+                }
+            } else {
+                window.location.href = "index.html";
+            }
+        });
+    </script>
+</head>
+<body>
+    <div id="joined-tournaments">
+        <!-- Tournaments joined by the user will be displayed here -->
+    </div>
+</body>
+</html>
