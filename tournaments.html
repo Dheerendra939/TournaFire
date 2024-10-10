@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tournaments</title>
+    <link rel="stylesheet" href="styles.css">
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
+        import { getFirestore, doc, getDoc, updateDoc, arrayUnion } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_AUTH_DOMAIN",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_STORAGE_BUCKET",
+            messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+            appId: "YOUR_APP_ID",
+            measurementId: "YOUR_MEASUREMENT_ID"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // Handle user state and tournament listing
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                // Fetch and display upcoming tournaments
+                const tournamentsSection = document.getElementById('tournaments-list');
+                tournamentsSection.innerHTML = '<p>Loading tournaments...</p>';
+
+                const tournaments = [
+                    { name: "Tournament 1", entryFee: 10, prize: "₹1000", id: "t1" },
+                    { name: "Tournament 2", entryFee: 15, prize: "₹1500", id: "t2" },
+                    { name: "Tournament 3", entryFee: 20, prize: "₹2000", id: "t3" }
+                ];
+
+                // Display tournaments with join buttons
+                tournamentsSection.innerHTML = tournaments.map(t => `
+                    <div class="tournament-card">
+                        <h2>${t.name}</h2>
+                        <p>Entry Fee: ₹${t.entryFee}</p>
+                        <p>Prize: ${t.prize}</p>
+                        <button onclick="joinTournament('${t.id}', ${t.entryFee})">Join</button>
+                    </div>
+                `).join('');
+            } else {
+                // Redirect to the login page if not authenticated
+                window.location.href = "index.html";
+            }
+        });
+
+        // Function to join a tournament
+        async function joinTournament(tournamentId, entryFee) {
+            const user = auth.currentUser;
+            if (!user) return;
+
+            const userDocRef = doc(db, "users", user.uid);
+            const userDoc = await getDoc(userDocRef);
+            if (userDoc.exists()) {
+                const userData = userDoc.data();
+                const currentBalance = userData.balance || 0;
+
+                if (currentBalance < entryFee) {
+                    alert("Insufficient balance!");
+                    return;
+                }
+
+                // Deduct entry fee from balance
+                await updateDoc(userDocRef, {
+                    balance: currentBalance - entryFee
+                });
+
+                // Add user to the tournament group
+                const tournamentDocRef = doc(db, "tournaments", tournamentId);
+                const tournamentDoc = await getDoc(tournamentDocRef);
+
+                if (!tournamentDoc.exists()) {
+                    await setDoc(tournamentDocRef, { players: [[]] }); // Initialize tournament with empty group
+                }
+
+                const tournamentData = (await getDoc(tournamentDocRef)).data();
+                const groups = tournamentData.players || [[]];
+                let added = false;
+
+                // Find an open group with less than 48 players
+                for (let group of groups) {
+                    if (group.length < 48) {
+                        group.push(userData.freeFireName || user.displayName);
+                        added = true;
+                        break;
+                    }
+                }
+
+                if (!added) {
+                    // Create a new group if all existing ones are full
+                    groups.push([userData.freeFireName || user.displayName]);
+                }
+
+                await updateDoc(tournamentDocRef, { players: groups });
+                alert("You have successfully joined the tournament!");
+            }
+        }
+    </script>
+</head>
+<body>
+    <div class="tournaments-container">
+        <h1>Upcoming Tournaments</h1>
+        <div id="tournaments-list">
+            <!-- Tournaments will be dynamically loaded here -->
+        </div>
+    </div>
+</body>
+</html>
