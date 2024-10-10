@@ -1,85 +1,64 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <!-- Navigation Bar -->
-<nav class="navbar">
-    <button onclick="location.href='profile.html'">Profile</button>
-    <button onclick="location.href='tournaments.html'">Tournaments</button>
-    <button onclick="location.href='joined.html'">Joined</button>
-</nav>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>User Profile</title>
     <link rel="stylesheet" href="styles.css">
-    <script type="module">
-        // Import the required Firebase SDK functions
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
-        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
-        import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+</head>
+<body>
+    <nav>
+        <a href="profile.html">Profile</a>
+        <a href="tournaments.html">Tournaments</a>
+        <a href="joined.html">Joined</a>
+    </nav>
 
-        // Firebase configuration
+    <div class="profile-container">
+        <h1>Welcome, <span id="displayName"></span></h1>
+        <p>Email: <span id="email"></span></p>
+        <p>Balance: <span id="balance"></span></p>
+        <p>Free Fire Name: <span id="freeFireName"></span></p>
+        <p>Mobile Number: <span id="mobileNumber"></span></p>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
+        import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+
         const firebaseConfig = {
-            apiKey: "AIzaSyAO7yVsbW4UiirQkETYP_EEojjdhWqWhOQ",
-            authDomain: "tournafire-tournament.firebaseapp.com",
-            projectId: "tournafire-tournament",
-            storageBucket: "tournafire-tournament.appspot.com",
-            messagingSenderId: "406026369566",
-            appId: "1:406026369566:web:2cb92862b0fa486b628c0f",
-            measurementId: "G-PN0B950P6R"
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_AUTH_DOMAIN",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_STORAGE_BUCKET",
+            messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+            appId: "YOUR_APP_ID",
+            measurementId: "YOUR_MEASUREMENT_ID"
         };
 
-        // Initialize Firebase
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        // Check if the user is logged in and load their profile data
         onAuthStateChanged(auth, async (user) => {
             if (user) {
-                // Get user data from Firestore or set initial data with a balance of 10 if not present
                 const userDocRef = doc(db, "users", user.uid);
                 const userDoc = await getDoc(userDocRef);
 
-                if (!userDoc.exists()) {
-                    // Set the default data for a new user with balance = 10
-                    await setDoc(userDocRef, {
-                        email: user.email,
-                        displayName: user.displayName,
-                        photoURL: user.photoURL,
-                        freeFireName: "New Player", // Default placeholder for Free Fire name
-                        balance: 10
-                    });
+                if (userDoc.exists()) {
+                    const { displayName, email, balance, freeFireName, mobileNumber } = userDoc.data();
+                    document.getElementById('displayName').textContent = displayName;
+                    document.getElementById('email').textContent = email;
+                    document.getElementById('balance').textContent = balance;
+                    document.getElementById('freeFireName').textContent = freeFireName || "Not Set";
+                    document.getElementById('mobileNumber').textContent = mobileNumber || "Not Set";
                 }
-
-                // Fetch the updated data
-                const updatedUserDoc = await getDoc(userDocRef);
-                const userData = updatedUserDoc.data();
-
-                // Populate the profile page with user data
-                document.getElementById("profilePic").src = userData.photoURL || "default-profile.png";
-                document.getElementById("freeFireName").textContent = ` ${userData.freeFireName || "N/A"}`;
-                document.getElementById("balance").textContent = `Balance: ₹${userData.balance || 0}`;
             } else {
-                // Redirect to the sign-up page if the user is not authenticated
-                window.location.href = "index.html";
+                window.location.href = "signup.html";
             }
         });
+
+        // Add a sign-out function if needed
     </script>
-</head>
-<body>
-    <div class="profile-container">
-        <!-- Profile Picture -->
-        <img id="profilePic" src="default-profile.png" alt="Profile Picture" class="profile-pic">
-
-        <!-- User Information -->
-        <h2 id="freeFireName">Name: Loading...</h2>
-        <h3 id="balance">Balance: Loading...</h3>
-
-        <!-- Action Buttons -->
-        <div class="action-buttons">
-            <button onclick="window.location.href='add-balance.html'">Add Balance</button>
-            <button onclick="window.location.href='withdrawal.html'">Withdraw</button>
-        </div>
-    </div>
 </body>
 </html>
