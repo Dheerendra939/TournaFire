@@ -57,7 +57,7 @@
 
                 // Populate the profile page with user data
                 document.getElementById("profilePic").src = userData.photoURL || "default-profile.png";
-                document.getElementById("freeFireName").textContent = `Free Fire Name: ${userData.freeFireName || "N/A"}`;
+                document.getElementById("freeFireName").textContent = ` ${userData.freeFireName || "N/A"}`;
                 document.getElementById("balance").textContent = `Balance: ₹${userData.balance || 0}`;
             } else {
                 // Redirect to the sign-up page if the user is not authenticated
@@ -72,7 +72,7 @@
         <img id="profilePic" src="default-profile.png" alt="Profile Picture" class="profile-pic">
 
         <!-- User Information -->
-        <h2 id="freeFireName">Free Fire Name: Loading...</h2>
+        <h2 id="freeFireName">Name: Loading...</h2>
         <h3 id="balance">Balance: Loading...</h3>
 
         <!-- Action Buttons -->
