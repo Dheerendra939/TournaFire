@@ -8,17 +8,17 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
-        import { getFirestore, doc, getDoc, updateDoc, arrayUnion } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+        import { getFirestore, doc, getDoc, updateDoc, setDoc } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 
         // Firebase configuration
         const firebaseConfig = {
-            apiKey: "YOUR_API_KEY",
-            authDomain: "YOUR_AUTH_DOMAIN",
-            projectId: "YOUR_PROJECT_ID",
-            storageBucket: "YOUR_STORAGE_BUCKET",
-            messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-            appId: "YOUR_APP_ID",
-            measurementId: "YOUR_MEASUREMENT_ID"
+            apiKey: "AIzaSyAO7yVsbW4UiirQkETYP_EEojjdhWqWhOQ",
+            authDomain: "tournafire-tournament.firebaseapp.com",
+            projectId: "tournafire-tournament",
+            storageBucket: "tournafire-tournament.appspot.com",
+            messagingSenderId: "406026369566",
+            appId: "1:406026369566:web:2cb92862b0fa486b628c0f",
+            measurementId: "G-PN0B950P6R"
         };
 
         // Initialize Firebase
@@ -29,7 +29,6 @@
         // Handle user state and tournament listing
         onAuthStateChanged(auth, async (user) => {
             if (user) {
-                // Fetch and display upcoming tournaments
                 const tournamentsSection = document.getElementById('tournaments-list');
                 tournamentsSection.innerHTML = '<p>Loading tournaments...</p>';
 
