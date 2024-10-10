@@ -57,7 +57,7 @@
 
                 // Populate the profile page with user data
                 document.getElementById("profilePic").src = userData.photoURL || "default-profile.png";
-                document.getElementById("freeFireName").textContent = ${userData.freeFireName || "N/A"}`;
+                document.getElementById("freeFireName").textContent = `: ${userData.freeFireName || "N/A"}`;
                 document.getElementById("balance").textContent = `Balance: ₹${userData.balance || 0}`;
             } else {
                 // Redirect to the sign-up page if the user is not authenticated
