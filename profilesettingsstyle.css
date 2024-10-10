@@ -43,8 +43,8 @@ body {
 /* Form Inputs */
 .profile-settings-container input {
     width: 100%;
-    padding: 12px 15px;
-    margin-bottom: 15px;
+    padding: 12px 12px;
+    margin-bottom: 10px;
     border-radius: 8px;
     border: 1px solid #ff6600; /* Orange border */
     background: #2e2e2e; /* Dark input background */
