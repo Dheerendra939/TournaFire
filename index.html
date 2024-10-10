@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up with Google</title>
+    <link rel="stylesheet" href="styles.css">
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+        import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
+        import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyAO7yVsbW4UiirQkETYP_EEojjdhWqWhOQ",
+            authDomain: "tournafire-tournament.firebaseapp.com",
+            projectId: "tournafire-tournament",
+            storageBucket: "tournafire-tournament.appspot.com",
+            messagingSenderId: "406026369566",
+            appId: "1:406026369566:web:2cb92862b0fa486b628c0f",
+            measurementId: "G-PN0B950P6R"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const provider = new GoogleAuthProvider();
+
+        // Check user's sign-in status and redirect accordingly
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                const userDocRef = doc(db, "users", user.uid);
+                const userDoc = await getDoc(userDocRef);
+
+                if (userDoc.exists()) {
+                    const { freeFireName, mobileNumber } = userDoc.data();
+                    if (freeFireName && mobileNumber) {
+                        window.location.href = "profile.html"; // Redirect to profile if details are filled
+                    } else {
+                        window.location.href = "profile-settings.html"; // Redirect to profile settings
+                    }
+                }
+            }
+        });
+
+        // Sign up with Google and set default data
+        async function signUpWithGoogle() {
+            try {
+                const result = await signInWithPopup(auth, provider);
+                const user = result.user;
+
+                // Check if the user already exists in Firestore
+                const userDocRef = doc(db, "users", user.uid);
+                const userDoc = await getDoc(userDocRef);
+
+                if (!userDoc.exists()) {
+                    // New user: set initial data and redirect to profile settings
+                    await setDoc(userDocRef, {
+                        email: user.email,
+                        displayName: user.displayName,
+                        photoURL: user.photoURL,
+                        balance: 10, // Default balance for new users
+                        freeFireName: "", // Empty Free Fire Name, indicating profile not set
+                        mobileNumber: "" // Empty Mobile Number, indicating profile not set
+                    });
+                    window.location.href = "profile-settings.html";
+                } else {
+                    // Existing user: check if profile details are filled
+                    const { freeFireName, mobileNumber } = userDoc.data();
+                    if (freeFireName && mobileNumber) {
+                        window.location.href = "profile.html";
+                    } else {
+                        window.location.href = "profile-settings.html";
+                    }
+                }
+            } catch (error) {
+                console.error("Error during Google Sign-In:", error);
+            }
+        }
+
+        // Attach the function to the button after the page loads
+        window.onload = () => {
+            document.getElementById("googleSignUpButton").addEventListener("click", signUpWithGoogle);
+        };
+    </script>
+</head>
+<body>
+    <div class="sign-up-container">
+        <h1>Sign Up with Google</h1>
+        <button id="googleSignUpButton">Sign Up with Google</button>
+    </div>
+</body>
+</html>

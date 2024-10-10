@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile Settings</title>
+    <link rel="stylesheet" href="styles.css">
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
+        import { getFirestore, doc, updateDoc } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyAO7yVsbW4UiirQkETYP_EEojjdhWqWhOQ",
+            authDomain: "tournafire-tournament.firebaseapp.com",
+            projectId: "tournafire-tournament",
+            storageBucket: "tournafire-tournament.appspot.com",
+            messagingSenderId: "406026369566",
+            appId: "1:406026369566:web:2cb92862b0fa486b628c0f",
+            measurementId: "G-PN0B950P6R"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // Save profile settings
+        async function saveProfileSettings() {
+            const user = auth.currentUser;
+            if (user) {
+                const freeFireName = document.getElementById("freeFireName").value;
+                const mobileNumber = document.getElementById("mobileNumber").value;
+
+                // Update Firestore with the new profile data
+                await updateDoc(doc(db, "users", user.uid), {
+                    freeFireName,
+                    mobileNumber
+                });
+
+                // Redirect to profile page
+                window.location.href = "profile.html";
+            }
+        }
+
+        // Attach the function to the save button after the page loads
+        window.onload = () => {
+            document.getElementById("saveProfileButton").addEventListener("click", saveProfileSettings);
+        };
+    </script>
+</head>
+<body>
+    <div class="profile-settings-container">
+        <h2>Complete Your Profile</h2>
+        <label for="freeFireName">Free Fire Name:</label>
+        <input type="text" id="freeFireName" placeholder="Enter your Free Fire Name" required>
+
+        <label for="mobileNumber">Mobile Number:</label>
+        <input type="tel" id="mobileNumber" placeholder="Enter your Mobile Number" required>
+
+        <button id="saveProfileButton">Save</button>
+    </div>
+</body>
+</html>
