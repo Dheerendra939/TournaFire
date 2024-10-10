@@ -44,7 +44,7 @@ body {
 .profile-settings-container input {
     width: 80%;
     padding: 12px 12px;
-    margin-bottom: 10px;
+    margin-bottom: 300px;
     border-radius: 8px;
     border: 1px solid #ff6600; /* Orange border */
     background: #2e2e2e; /* Dark input background */
