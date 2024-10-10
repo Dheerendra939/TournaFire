@@ -7,14 +7,47 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <header>
-        <h1>Joined Tournaments</h1>
-    </header>
+    <nav>
+        <a href="profile.html">Profile</a>
+        <a href="tournaments.html">Tournaments</a>
+        <a href="joined.html">Joined</a>
+    </nav>
 
-    <section id="joined-tournaments">
-        <!-- This section will be populated with the tournaments the user has joined -->
-    </section>
+    <div id="joined-tournaments">
+        <!-- Joined tournaments will be dynamically rendered here -->
+    </div>
 
-    <script src="joined.js"></script>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
+        import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+
+        const firebaseConfig = { /* Your Firebase configuration here */ };
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                const userDocRef = doc(db, "users", user.uid);
+                const userDoc = await getDoc(userDocRef);
+
+                if (userDoc.exists()) {
+                    const joinedTournaments = [];  // Fetch from the database
+                    const joinedSection = document.getElementById('joined-tournaments');
+
+                    // Display the tournaments the user has joined
+                    joinedTournaments.forEach(tournament => {
+                        const div = document.createElement('div');
+                        div.innerHTML = `
+                            <h2>${tournament.name}</h2>
+                            <p>${tournament.details}</p>
+                        `;
+                        joinedSection.appendChild(div);
+                    });
+                }
+            }
+        });
+    </script>
 </body>
 </html>
